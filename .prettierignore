@@ -1,0 +1,8 @@
+node_modules
+dist
+coverage
+pnpm-lock.yaml
+.nvmrc
+.env
+.env.test
+apps/api/drizzle/**

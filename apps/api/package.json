@@ -1,0 +1,52 @@
+{
+  "name": "@jubilant-carnival/api",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "clean": "rimraf dist",
+    "dev": "tsx watch src/bootstrap.ts",
+    "build": "pnpm run clean && tsc -p tsconfig.json",
+    "start": "node dist/bootstrap.js",
+    "typecheck": "tsc -p tsconfig.typecheck.json",
+    "lint": "pnpm exec eslint src tests drizzle.config.ts vitest.config.ts",
+    "lint:fix": "pnpm exec eslint src tests drizzle.config.ts vitest.config.ts --fix",
+    "format": "pnpm exec prettier --write src tests package.json tsconfig.json drizzle.config.ts vitest.config.ts compose.yml",
+    "format:check": "pnpm exec prettier --check src tests package.json tsconfig.json drizzle.config.ts vitest.config.ts compose.yml",
+    "test:http": "pnpm exec vitest run tests/integration/http",
+    "test:process": "pnpm run build && pnpm exec vitest run tests/integration/process",
+    "test:db": "pnpm exec vitest run tests/integration/db",
+    "test": "pnpm run build && pnpm exec vitest run",
+    "db:up": "docker compose -f compose.yml up -d",
+    "db:down": "docker compose -f compose.yml down",
+    "db:generate": "drizzle-kit generate --config=drizzle.config.ts",
+    "db:migrate": "drizzle-kit migrate --config=drizzle.config.ts",
+    "db:studio": "drizzle-kit studio --config=drizzle.config.ts"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.1",
+    "drizzle-orm": "^0.44.7",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "pino": "^10.3.1",
+    "pino-http": "^11.0.0",
+    "pg": "^8.16.3",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.12.2",
+    "@types/pg": "^8.15.6",
+    "@types/supertest": "^6.0.3",
+    "drizzle-kit": "^0.31.6",
+    "pino-pretty": "^13.1.3",
+    "rimraf": "^6.1.3",
+    "supertest": "^7.1.4",
+    "testcontainers": "^11.7.2",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2",
+    "vitest": "^3.2.4"
+  }
+}
