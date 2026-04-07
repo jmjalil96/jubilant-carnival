@@ -72,6 +72,13 @@ const apiCommand = [
   "NODE_ENV=development",
   "LOG_LEVEL=error",
   "SHUTDOWN_TIMEOUT_MS=10000",
+  "SMTP_HOST=localhost",
+  "SMTP_PORT=1025",
+  "SMTP_SECURE=false",
+  "SMTP_USERNAME=test",
+  "SMTP_PASSWORD=test",
+  "EMAIL_FROM=test@example.com",
+  `PASSWORD_RESET_URL_BASE=http://localhost:${previewPort}/reset-password`,
   "pnpm --dir ../api dev",
 ].join(" ");
 
