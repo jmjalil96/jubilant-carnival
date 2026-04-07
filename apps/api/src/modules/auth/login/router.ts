@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import { validatedRoute } from "../../../http/validation.js";
 import { createSessionBodySchema, type LoginResponse } from "./contracts.js";
+import { toCurrentSessionResponse } from "../shared/contracts.js";
 import type { LoginService } from "./service.js";
 import type { SessionManager } from "../shared/session.js";
 
@@ -44,12 +45,10 @@ export function createLoginRouter({
           sessionManager.getCookieOptions(result.expiresAt),
         );
 
-        const responseBody = {
+        const responseBody = toCurrentSessionResponse({
           actor: result.actor,
-          session: {
-            expiresAt: result.expiresAt.toISOString(),
-          },
-        } satisfies LoginResponse;
+          expiresAt: result.expiresAt,
+        }) satisfies LoginResponse;
 
         res.status(200).json(responseBody);
       },

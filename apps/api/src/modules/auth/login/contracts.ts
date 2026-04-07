@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { CurrentSessionResponse } from "../shared/contracts.js";
 
 export const createSessionBodySchema = z.object({
   email: z.string().trim().min(1).max(320),
@@ -7,21 +8,4 @@ export const createSessionBodySchema = z.object({
 
 export type CreateSessionBody = z.output<typeof createSessionBodySchema>;
 
-export type LoginResponse = {
-  actor: {
-    user: {
-      id: string;
-      email: string;
-      displayName: string | null;
-    };
-    tenant: {
-      id: string;
-      slug: string;
-      name: string;
-    };
-    roleKeys: string[];
-  };
-  session: {
-    expiresAt: string;
-  };
-};
+export type LoginResponse = CurrentSessionResponse;

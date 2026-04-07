@@ -6,11 +6,13 @@ import { eq } from "drizzle-orm";
 import type { Database } from "../../src/infra/db.js";
 import {
   roles,
+  sessions,
   tenants,
   userPasswords,
   userRoles,
   users,
 } from "../../src/infra/schema.js";
+import { hashSessionToken } from "../../src/modules/auth/shared/session.js";
 
 type SeedLoginUserFixtureOptions = {
   db: Database;
@@ -31,6 +33,22 @@ type SeededLoginUserFixture = {
   email: string;
   password: string;
   roleKeys: string[];
+};
+
+type CreateSessionFixtureOptions = {
+  db: Database;
+  userId: string;
+  sessionToken?: string;
+  expiresAt?: Date;
+  revokedAt?: Date | null;
+  createdAt?: Date;
+};
+
+type SeededSessionFixture = {
+  sessionId: string;
+  sessionToken: string;
+  expiresAt: Date;
+  createdAt: Date;
 };
 
 async function findOrCreateRole(
@@ -115,5 +133,32 @@ export async function seedLoginUserFixture({
     email,
     password,
     roleKeys,
+  };
+}
+
+export async function createSessionFixture({
+  db,
+  userId,
+  sessionToken = randomUUID(),
+  expiresAt = new Date("2026-02-01T00:00:00.000Z"),
+  revokedAt,
+  createdAt = new Date("2026-01-01T00:00:00.000Z"),
+}: CreateSessionFixtureOptions): Promise<SeededSessionFixture> {
+  const sessionId = randomUUID();
+
+  await db.insert(sessions).values({
+    id: sessionId,
+    userId,
+    tokenHash: hashSessionToken(sessionToken),
+    expiresAt,
+    ...(revokedAt === undefined ? {} : { revokedAt }),
+    createdAt,
+  });
+
+  return {
+    sessionId,
+    sessionToken,
+    expiresAt,
+    createdAt,
   };
 }
