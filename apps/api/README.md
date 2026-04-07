@@ -259,19 +259,32 @@ Current environment variables:
 - `NODE_ENV`
 - `LOG_LEVEL`
 - `SHUTDOWN_TIMEOUT_MS`
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_SECURE`
+- `SMTP_USERNAME`
+- `SMTP_PASSWORD`
+- `EMAIL_FROM`
+- `EMAIL_REPLY_TO`
+- `PASSWORD_RESET_URL_BASE`
 
 These are validated by `src/infra/env.ts`. Invalid values should fail fast before the server starts listening.
 
 ### Local Database
 
-Use the provided Docker Compose file for local PostgreSQL:
+Use the provided Docker Compose file for local PostgreSQL and SMTP capture:
 
 ```sh
 pnpm db:up
 pnpm db:down
 ```
 
-The container uses PostgreSQL 17 and exposes port `5432`.
+- PostgreSQL 17 is exposed on port `5432`.
+- Inbucket SMTP is exposed on port `2500`.
+- Inbucket web UI is exposed on port `9000`.
+- Inbucket POP3 is exposed on port `1100`.
+
+With the default `.env.example`, password reset emails are sent to Inbucket and can be viewed at [http://localhost:9000](http://localhost:9000).
 
 ### Drizzle Commands
 

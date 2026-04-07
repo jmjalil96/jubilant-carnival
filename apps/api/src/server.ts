@@ -2,6 +2,7 @@ import type { Server } from "node:http";
 import { createApp } from "./http/app.js";
 import { loadEnv } from "./infra/env.js";
 import { createDatabaseClient } from "./infra/db.js";
+import { createSmtpEmailService } from "./infra/email/index.js";
 import { createHttpLogger, createLogger } from "./infra/logger.js";
 import { createDatabaseReadinessCheck } from "./modules/system/readiness.js";
 
@@ -25,6 +26,17 @@ export function startServer(): void {
     nodeEnv: env.NODE_ENV,
   });
   const httpLogger = createHttpLogger({ logger });
+  const emailService = createSmtpEmailService({
+    smtpHost: env.SMTP_HOST,
+    smtpPort: env.SMTP_PORT,
+    smtpSecure: env.SMTP_SECURE,
+    smtpUsername: env.SMTP_USERNAME,
+    smtpPassword: env.SMTP_PASSWORD,
+    from: env.EMAIL_FROM,
+    ...(env.EMAIL_REPLY_TO === undefined
+      ? {}
+      : { replyTo: env.EMAIL_REPLY_TO }),
+  });
   const { db, pool } = createDatabaseClient({
     connectionString: env.DATABASE_URL,
     onError: (error) => {
@@ -38,6 +50,8 @@ export function startServer(): void {
     auth: {
       db,
       nodeEnv: env.NODE_ENV,
+      emailService,
+      passwordResetUrlBase: env.PASSWORD_RESET_URL_BASE,
     },
   });
   const server = app.listen(env.PORT, () => {

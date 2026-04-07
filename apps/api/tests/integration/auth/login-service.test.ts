@@ -46,6 +46,7 @@ describe("login service", () => {
           expiresAt: new Date("2026-02-01T00:00:00.000Z"),
         }),
       getCookieOptions: vi.fn(),
+      getClearedCookieOptions: vi.fn(),
     };
     const service = createLoginService({
       repository,
@@ -95,6 +96,7 @@ describe("login service", () => {
         expiresAt: new Date("2026-02-01T00:00:00.000Z"),
       }),
       getCookieOptions: vi.fn(),
+      getClearedCookieOptions: vi.fn(),
     };
     const service = createLoginService({
       repository,

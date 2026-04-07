@@ -15,5 +15,12 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  inbucket:
+    image: inbucket/inbucket:stable
+    ports:
+      - "2500:2500"
+      - "9000:9000"
+      - "1100:1100"
+
 volumes:
   postgres_data:

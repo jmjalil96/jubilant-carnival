@@ -9,9 +9,11 @@ import {
   sessions,
   tenants,
   userPasswords,
+  userTokens,
   userRoles,
   users,
 } from "../../src/infra/schema.js";
+import { hashPasswordResetToken } from "../../src/modules/auth/password-reset/token.js";
 import { hashSessionToken } from "../../src/modules/auth/shared/session.js";
 
 type SeedLoginUserFixtureOptions = {
@@ -49,6 +51,21 @@ type SeededSessionFixture = {
   sessionToken: string;
   expiresAt: Date;
   createdAt: Date;
+};
+
+type CreateUserTokenFixtureOptions = {
+  db: Database;
+  userId: string;
+  token?: string;
+  kind?: typeof userTokens.$inferInsert.kind;
+  expiresAt?: Date;
+  consumedAt?: Date | null;
+};
+
+type SeededUserTokenFixture = {
+  tokenId: string;
+  token: string;
+  expiresAt: Date;
 };
 
 async function findOrCreateRole(
@@ -160,5 +177,31 @@ export async function createSessionFixture({
     sessionToken,
     expiresAt,
     createdAt,
+  };
+}
+
+export async function createUserTokenFixture({
+  db,
+  userId,
+  token = randomUUID(),
+  kind = "password_reset",
+  expiresAt = new Date("2026-06-01T00:00:00.000Z"),
+  consumedAt,
+}: CreateUserTokenFixtureOptions): Promise<SeededUserTokenFixture> {
+  const tokenId = randomUUID();
+
+  await db.insert(userTokens).values({
+    id: tokenId,
+    userId,
+    kind,
+    tokenHash: hashPasswordResetToken(token),
+    expiresAt,
+    ...(consumedAt === undefined ? {} : { consumedAt }),
+  });
+
+  return {
+    tokenId,
+    token,
+    expiresAt,
   };
 }

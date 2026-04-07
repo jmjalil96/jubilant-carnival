@@ -66,6 +66,12 @@ describe("bootstrap process integration", () => {
         SHUTDOWN_TIMEOUT_MS: "0",
       },
     },
+    {
+      field: "PASSWORD_RESET_URL_BASE",
+      overrides: {
+        PASSWORD_RESET_URL_BASE: "not-a-url",
+      },
+    },
   ])(
     "fails fast before listening when $field is invalid",
     async ({ field, overrides }) => {

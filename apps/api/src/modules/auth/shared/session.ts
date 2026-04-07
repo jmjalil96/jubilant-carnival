@@ -74,6 +74,13 @@ export function readSessionTokenFromCookieHeader(
 }
 
 export function createSessionManager({ nodeEnv }: SessionManagerOptions) {
+  const sharedCookieOptions = {
+    httpOnly: true,
+    sameSite: "lax" as const,
+    secure: nodeEnv === "production",
+    path: "/api",
+  };
+
   return {
     cookieName: AUTH_SESSION_COOKIE_NAME,
 
@@ -91,11 +98,15 @@ export function createSessionManager({ nodeEnv }: SessionManagerOptions) {
 
     getCookieOptions(expiresAt: Date): CookieOptions {
       return {
-        httpOnly: true,
-        sameSite: "lax",
-        secure: nodeEnv === "production",
-        path: "/api",
+        ...sharedCookieOptions,
         expires: expiresAt,
+      };
+    },
+
+    getClearedCookieOptions(): CookieOptions {
+      return {
+        ...sharedCookieOptions,
+        expires: new Date(0),
       };
     },
   };

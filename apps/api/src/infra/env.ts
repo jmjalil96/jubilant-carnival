@@ -17,6 +17,54 @@ const defaultLogLevelByNodeEnv = {
   test: "silent",
 } as const;
 
+function booleanFromEnv(variableName: string) {
+  return z.string().transform((value, ctx) => {
+    if (value === "true") {
+      return true;
+    }
+
+    if (value === "false") {
+      return false;
+    }
+
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `${variableName} must be true or false`,
+    });
+
+    return z.NEVER;
+  });
+}
+
+function absoluteUrlFromEnv(variableName: string) {
+  return z.string().transform((value, ctx) => {
+    try {
+      const parsedValue = new URL(value);
+
+      if (
+        parsedValue.protocol !== "http:" &&
+        parsedValue.protocol !== "https:"
+      ) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `${variableName} must use the http or https protocol`,
+        });
+
+        return z.NEVER;
+      }
+
+      return parsedValue.toString();
+    } catch {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `${variableName} must be a valid absolute URL`,
+      });
+
+      return z.NEVER;
+    }
+  });
+}
+
 function positiveIntegerFromEnv(variableName: string, defaultValue?: string) {
   const schema = z.string();
 
@@ -72,6 +120,14 @@ const appEnvSchema = z
     NODE_ENV: nodeEnvSchema.default("development"),
     LOG_LEVEL: logLevelSchema.optional(),
     SHUTDOWN_TIMEOUT_MS: positiveIntegerFromEnv("SHUTDOWN_TIMEOUT_MS", "10000"),
+    SMTP_HOST: z.string().min(1, "SMTP_HOST is required"),
+    SMTP_PORT: positiveIntegerFromEnv("SMTP_PORT"),
+    SMTP_SECURE: booleanFromEnv("SMTP_SECURE"),
+    SMTP_USERNAME: z.string().min(1, "SMTP_USERNAME is required"),
+    SMTP_PASSWORD: z.string().min(1, "SMTP_PASSWORD is required"),
+    EMAIL_FROM: z.string().min(1, "EMAIL_FROM is required"),
+    EMAIL_REPLY_TO: z.string().min(1).optional(),
+    PASSWORD_RESET_URL_BASE: absoluteUrlFromEnv("PASSWORD_RESET_URL_BASE"),
   })
   .transform(({ LOG_LEVEL, NODE_ENV, SHUTDOWN_TIMEOUT_MS, ...rest }) => ({
     ...rest,
