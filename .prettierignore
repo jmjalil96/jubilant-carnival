@@ -6,3 +6,4 @@ pnpm-lock.yaml
 .env
 .env.test
 apps/api/drizzle/**
+apps/web/test-results/**

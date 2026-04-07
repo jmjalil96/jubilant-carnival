@@ -70,12 +70,14 @@ export function validatedRoute<
   return async (req, res) => {
     try {
       const params = schemas.params
-        ? schemas.params.parse(req.params)
+        ? await schemas.params.parseAsync(req.params)
         : EMPTY_INPUT;
       const query = schemas.query
-        ? schemas.query.parse(req.query)
+        ? await schemas.query.parseAsync(req.query)
         : EMPTY_INPUT;
-      const body = schemas.body ? schemas.body.parse(req.body) : undefined;
+      const body = schemas.body
+        ? await schemas.body.parseAsync(req.body)
+        : undefined;
 
       await handler({
         req,

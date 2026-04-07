@@ -27,6 +27,9 @@ export function startServer(): void {
   const httpLogger = createHttpLogger({ logger });
   const { db, pool } = createDatabaseClient({
     connectionString: env.DATABASE_URL,
+    onError: (error) => {
+      logger.error({ err: error }, "Unexpected PostgreSQL pool error");
+    },
   });
   const app = createApp({
     allowedOrigins: env.CORS_ORIGINS,

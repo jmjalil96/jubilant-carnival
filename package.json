@@ -6,13 +6,17 @@
     "node": "24.x"
   },
   "scripts": {
-    "typecheck": "pnpm --filter @jubilant-carnival/api typecheck",
-    "lint": "pnpm --filter @jubilant-carnival/api lint",
-    "lint:fix": "pnpm --filter @jubilant-carnival/api lint:fix",
+    "dev": "pnpm --parallel --stream --filter @jubilant-carnival/api --filter @jubilant-carnival/web dev",
+    "dev:api": "pnpm --filter @jubilant-carnival/api dev",
+    "dev:web": "pnpm --filter @jubilant-carnival/web dev",
+    "typecheck": "pnpm --filter @jubilant-carnival/api typecheck && pnpm --filter @jubilant-carnival/web typecheck",
+    "lint": "pnpm --filter @jubilant-carnival/api lint && pnpm --filter @jubilant-carnival/web lint",
+    "lint:fix": "pnpm --filter @jubilant-carnival/api lint:fix && pnpm --filter @jubilant-carnival/web lint:fix",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "build": "pnpm --filter @jubilant-carnival/api build",
-    "test": "pnpm --filter @jubilant-carnival/api test",
+    "build": "pnpm --filter @jubilant-carnival/api build && pnpm --filter @jubilant-carnival/web build",
+    "test": "pnpm --filter @jubilant-carnival/api test && pnpm --filter @jubilant-carnival/web test",
+    "test:e2e": "pnpm --filter @jubilant-carnival/web test:e2e",
     "test:http": "pnpm --filter @jubilant-carnival/api test:http",
     "test:process": "pnpm --filter @jubilant-carnival/api test:process",
     "test:db": "pnpm --filter @jubilant-carnival/api test:db"

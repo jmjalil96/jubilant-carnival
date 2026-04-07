@@ -38,6 +38,39 @@ function createValidationApp() {
     ),
   );
 
+  app.post(
+    "/validate-async/failure",
+    validatedRoute(
+      {
+        body: z.object({
+          email: z
+            .string()
+            .email()
+            .refine(async (value) => value !== "taken@example.com", {
+              message: "Email is already taken",
+            }),
+        }),
+      },
+      ({ body, res }) => {
+        res.status(200).json({ body });
+      },
+    ),
+  );
+
+  app.post(
+    "/validate-async/success",
+    validatedRoute(
+      {
+        body: z.object({
+          name: z.string().transform(async (value) => value.toUpperCase()),
+        }),
+      },
+      ({ body, res }) => {
+        res.status(200).json({ body });
+      },
+    ),
+  );
+
   app.use(errorHandler);
 
   return app;
@@ -128,5 +161,41 @@ describe("validatedRoute integration", () => {
         }),
       ]),
     );
+  });
+
+  it("returns validation_error for async validation failures", async () => {
+    const app = createValidationApp();
+
+    const response = await request(app)
+      .post("/validate-async/failure")
+      .send({
+        email: "taken@example.com",
+      });
+
+    expect(response.status).toBe(400);
+    expect(response.body.error.code).toBe("validation_error");
+    expect(response.body.error.message).toBe("Request validation failed");
+    expect(response.body.error.details.issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: ["email"],
+        }),
+      ]),
+    );
+  });
+
+  it("parses async transforms before invoking the handler", async () => {
+    const app = createValidationApp();
+
+    const response = await request(app).post("/validate-async/success").send({
+      name: "starter",
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      body: {
+        name: "STARTER",
+      },
+    });
   });
 });
