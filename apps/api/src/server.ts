@@ -35,6 +35,10 @@ export function startServer(): void {
     allowedOrigins: env.CORS_ORIGINS,
     checkReadiness: createDatabaseReadinessCheck(db),
     httpLogger,
+    auth: {
+      db,
+      nodeEnv: env.NODE_ENV,
+    },
   });
   const server = app.listen(env.PORT, () => {
     logger.info({ port: env.PORT }, "API server listening");

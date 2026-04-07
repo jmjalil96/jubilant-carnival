@@ -166,11 +166,9 @@ describe("validatedRoute integration", () => {
   it("returns validation_error for async validation failures", async () => {
     const app = createValidationApp();
 
-    const response = await request(app)
-      .post("/validate-async/failure")
-      .send({
-        email: "taken@example.com",
-      });
+    const response = await request(app).post("/validate-async/failure").send({
+      email: "taken@example.com",
+    });
 
     expect(response.status).toBe(400);
     expect(response.body.error.code).toBe("validation_error");

@@ -24,14 +24,15 @@
     "db:studio": "drizzle-kit studio --config=drizzle.config.ts"
   },
   "dependencies": {
+    "argon2": "^0.44.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.1",
     "drizzle-orm": "^0.44.7",
     "express": "^5.2.1",
     "helmet": "^8.1.0",
+    "pg": "^8.16.3",
     "pino": "^10.3.1",
     "pino-http": "^11.0.0",
-    "pg": "^8.16.3",
     "zod": "^4.3.6"
   },
   "devDependencies": {

@@ -1,51 +1,14 @@
-import { spawn } from "node:child_process";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { createDatabaseClient } from "../../../src/infra/db.js";
 import { createDatabaseReadinessCheck } from "../../../src/modules/system/readiness.js";
 import { createTestApp } from "../../helpers/create-app.js";
+import { runDatabaseMigrations } from "../../helpers/database-migrations.js";
 import {
   startPostgresContainer,
   type StartedPostgresContainer,
 } from "../../helpers/postgres-container.js";
-
-const currentDir = dirname(fileURLToPath(import.meta.url));
-const apiDir = resolve(currentDir, "../../..");
-
-async function runDatabaseMigrations(
-  connectionString: string,
-): Promise<{ code: number | null; output: string }> {
-  const child = spawn("pnpm", ["db:migrate"], {
-    cwd: apiDir,
-    env: {
-      ...process.env,
-      DATABASE_URL: connectionString,
-    },
-    stdio: ["ignore", "pipe", "pipe"],
-  });
-
-  let output = "";
-
-  child.stdout.on("data", (chunk: Buffer | string) => {
-    output += chunk.toString();
-  });
-
-  child.stderr.on("data", (chunk: Buffer | string) => {
-    output += chunk.toString();
-  });
-
-  const code = await new Promise<number | null>((resolveCode) => {
-    child.once("exit", (exitCode) => {
-      resolveCode(exitCode);
-    });
-  });
-
-  return { code, output };
-}
 
 describe("database-backed readiness", () => {
   let databaseUrl = "";
