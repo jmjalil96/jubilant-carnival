@@ -233,6 +233,45 @@ describe("password reset endpoints", () => {
   });
 
   describe("POST /api/v1/auth/password-reset/confirm", () => {
+    it("returns validation_error when the new password is shorter than 8 characters", async () => {
+      const db = databaseClient?.db;
+
+      expect(db).toBeDefined();
+
+      const fixture = await seedLoginUserFixture({
+        db: db!,
+      });
+      const token = await createUserTokenFixture({
+        db: db!,
+        userId: fixture.userId,
+        token: "short-password-reset-token",
+      });
+      const app = createTestApp({
+        auth: {
+          db: db!,
+          nodeEnv: "test",
+        },
+      });
+
+      const response = await request(app)
+        .post("/api/v1/auth/password-reset/confirm")
+        .send({
+          token: token.token,
+          password: "short7!",
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe("validation_error");
+      expect(response.body.error.details.issues).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            path: ["password"],
+            message: "Password must be at least 8 characters",
+          }),
+        ]),
+      );
+    });
+
     it("updates the password, clears reset_required, consumes tokens, revokes sessions, and does not set auth cookies", async () => {
       const db = databaseClient?.db;
 

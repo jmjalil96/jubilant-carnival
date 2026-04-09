@@ -10,8 +10,6 @@ const apiErrorEnvelopeSchema = z.object({
   }),
 });
 
-export type ApiErrorResponse = z.infer<typeof apiErrorEnvelopeSchema>;
-
 export class ApiError extends Error {
   readonly status: number;
   readonly code: string;
@@ -46,6 +44,34 @@ function normalizePath(path: string) {
 
 function createApiUrl(path: string) {
   return `${normalizeApiBaseUrl(env.VITE_API_BASE_URL)}${normalizePath(path)}`;
+}
+
+type RequestOptions = {
+  path: string;
+  method?: RequestInit["method"];
+  body?: unknown;
+  credentials?: RequestCredentials | undefined;
+};
+
+function createRequestInit({
+  method,
+  body,
+  credentials = "include",
+}: Omit<RequestOptions, "path">): RequestInit {
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+  };
+
+  if (body !== undefined) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  return {
+    headers,
+    credentials,
+    ...(method === undefined ? {} : { method }),
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+  };
 }
 
 async function parseJsonResponse(response: Response): Promise<unknown> {
@@ -89,21 +115,26 @@ function toApiError(response: Response, body: unknown) {
   });
 }
 
-export async function requestJson<T>({
+async function performRequest({
   path,
-  schema,
-}: {
-  path: string;
-  schema: z.ZodType<T>;
-}): Promise<T> {
+  method,
+  body,
+  credentials,
+}: RequestOptions): Promise<{
+  response: Response;
+  responseBody: unknown;
+}> {
   let response: Response;
 
   try {
-    response = await fetch(createApiUrl(path), {
-      headers: {
-        Accept: "application/json",
-      },
-    });
+    response = await fetch(
+      createApiUrl(path),
+      createRequestInit({
+        method,
+        body,
+        credentials,
+      }),
+    );
   } catch {
     throw new ApiError({
       status: 0,
@@ -112,13 +143,39 @@ export async function requestJson<T>({
     });
   }
 
-  const body = await parseJsonResponse(response);
+  const responseBody = await parseJsonResponse(response);
+
+  return {
+    response,
+    responseBody,
+  };
+}
+
+export async function requestJson<T>({
+  path,
+  schema,
+  method = "GET",
+  body,
+  credentials = "include",
+}: {
+  path: string;
+  schema: z.ZodType<T>;
+  method?: RequestInit["method"];
+  body?: unknown;
+  credentials?: RequestCredentials;
+}): Promise<T> {
+  const { response, responseBody } = await performRequest({
+    path,
+    method,
+    body,
+    credentials,
+  });
 
   if (!response.ok) {
-    throw toApiError(response, body);
+    throw toApiError(response, responseBody);
   }
 
-  const parsedBody = schema.safeParse(body);
+  const parsedBody = schema.safeParse(responseBody);
 
   if (!parsedBody.success) {
     throw new ApiError({
@@ -130,4 +187,27 @@ export async function requestJson<T>({
   }
 
   return parsedBody.data;
+}
+
+export async function requestVoid({
+  path,
+  method,
+  body,
+  credentials = "include",
+}: {
+  path: string;
+  method: RequestInit["method"];
+  body?: unknown;
+  credentials?: RequestCredentials;
+}): Promise<void> {
+  const { response, responseBody } = await performRequest({
+    path,
+    method,
+    body,
+    credentials,
+  });
+
+  if (!response.ok) {
+    throw toApiError(response, responseBody);
+  }
 }

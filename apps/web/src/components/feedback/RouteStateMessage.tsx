@@ -52,7 +52,9 @@ export function StatePrimaryLink({
 }) {
   return (
     <Button asChild className="rounded-full">
-      <Link to={to}>{children}</Link>
+      <Link discover="none" to={to}>
+        {children}
+      </Link>
     </Button>
   );
 }

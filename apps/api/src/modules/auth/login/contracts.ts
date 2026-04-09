@@ -6,6 +6,4 @@ export const createSessionBodySchema = z.object({
   password: z.string().min(1).max(1_024),
 });
 
-export type CreateSessionBody = z.output<typeof createSessionBodySchema>;
-
 export type LoginResponse = CurrentSessionResponse;

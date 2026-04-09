@@ -97,11 +97,7 @@ export function createAuthContextRepository({
           .limit(1)
           .for("share", { of: [userPasswords] });
 
-        if (
-          passwordState === undefined ||
-          passwordState.passwordUpdatedAt === null ||
-          passwordState.resetRequired === null
-        ) {
+        if (passwordState === undefined) {
           return toUnauthenticated("missing_password_row");
         }
 

@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 
-import type { ApiError } from "@/lib/api/client";
 import { fetchHealth, fetchReadiness } from "@/features/system/api";
 
 export const systemQueryKeys = {
@@ -22,5 +21,3 @@ export function useReadinessQuery() {
     queryFn: fetchReadiness,
   });
 }
-
-export type SystemQueryError = ApiError;

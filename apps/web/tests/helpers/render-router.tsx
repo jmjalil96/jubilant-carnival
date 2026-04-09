@@ -1,4 +1,5 @@
 import { QueryClientProvider } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
@@ -13,11 +14,12 @@ import { appRoutes } from "@/app/router";
 export function renderRouterWithProviders({
   initialEntries = ["/"],
   routes,
+  queryClient = createQueryClient(),
 }: {
   initialEntries?: string[];
+  queryClient?: QueryClient;
   routes: RouteObject[];
 }) {
-  const queryClient = createQueryClient();
   const router = createMemoryRouter(routes, { initialEntries });
   const user = userEvent.setup();
 
@@ -35,9 +37,17 @@ export function renderRouterWithProviders({
   };
 }
 
-export function renderAppRoute(initialEntry = "/") {
+export function renderAppRoute(
+  initialEntry = "/",
+  options?: {
+    queryClient?: QueryClient;
+  },
+) {
   return renderRouterWithProviders({
     initialEntries: [initialEntry],
+    ...(options?.queryClient === undefined
+      ? {}
+      : { queryClient: options.queryClient }),
     routes: appRoutes,
   });
 }

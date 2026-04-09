@@ -125,6 +125,9 @@ Keep shell and route-error logic here. Do not duplicate it per route.
 
 Current route components are:
 
+- `routes/login/LoginPage.tsx`
+- `routes/forgot-password/ForgotPasswordPage.tsx`
+- `routes/reset-password/ResetPasswordPage.tsx`
 - `routes/home/HomePage.tsx`
 - `routes/system/SystemPage.tsx`
 - `routes/not-found/NotFoundPage.tsx`
@@ -136,6 +139,8 @@ Use route components to:
 - decide how to render loading, success, and failure states
 
 Do not put API client code directly in routes when a feature module can own it.
+
+The current web app assumes the API auth routes are mounted. The shared shell and auth route gate call `/api/v1/auth/me`, so running the backend without auth routes is only appropriate for tests or API-only compositions.
 
 ## How To Use `src/features`
 

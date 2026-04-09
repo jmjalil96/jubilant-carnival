@@ -1,9 +1,12 @@
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 import { NavLink, useMatch, useResolvedPath } from "react-router";
 
+import InlineApiErrorPanel from "@/components/feedback/InlineApiErrorPanel";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useLogoutMutation } from "@/features/auth/mutations";
+import { useAuthSession } from "@/features/auth/queries";
 import { cn } from "@/lib/utils";
 
 function ShellNavLink({
@@ -25,7 +28,7 @@ function ShellNavLink({
       size="sm"
       variant={isActive ? "default" : "outline"}
     >
-      <NavLink end={end} to={to}>
+      <NavLink discover="none" end={end} to={to}>
         {children}
       </NavLink>
     </Button>
@@ -33,6 +36,40 @@ function ShellNavLink({
 }
 
 function AppShell({ children }: PropsWithChildren) {
+  const authSession = useAuthSession();
+  const logoutMutation = useLogoutMutation();
+  const authError = authSession.error
+    ? authSession.error
+    : logoutMutation.isError
+      ? logoutMutation.error
+      : null;
+
+  let authAction: ReactNode;
+
+  if (authSession.status === "checking") {
+    authAction = (
+      <Button className="rounded-full" disabled size="sm" variant="outline">
+        Checking session
+      </Button>
+    );
+  } else if (authSession.status === "unauthenticated") {
+    authAction = <ShellNavLink to="/login">Login</ShellNavLink>;
+  } else {
+    authAction = (
+      <Button
+        className="rounded-full"
+        disabled={logoutMutation.isPending}
+        onClick={() => {
+          logoutMutation.mutate();
+        }}
+        size="sm"
+        type="button"
+      >
+        {logoutMutation.isPending ? "Logging out..." : "Logout"}
+      </Button>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto flex min-h-screen w-full max-w-5xl flex-col gap-4 px-4 py-6 sm:px-6 lg:px-8">
@@ -52,6 +89,7 @@ function AppShell({ children }: PropsWithChildren) {
                   Home
                 </ShellNavLink>
                 <ShellNavLink to="/system">System</ShellNavLink>
+                {authAction}
               </nav>
             </div>
             <Separator className="bg-border/70" />
@@ -60,6 +98,9 @@ function AppShell({ children }: PropsWithChildren) {
               route-level failure handling while the starter stays
               infrastructure-first.
             </p>
+            {authError === null ? null : (
+              <InlineApiErrorPanel error={authError} label="Auth" />
+            )}
           </CardContent>
         </Card>
         <main className="flex-1">

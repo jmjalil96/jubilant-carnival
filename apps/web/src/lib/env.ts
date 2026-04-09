@@ -29,9 +29,7 @@ const browserEnvSchema = z.object({
   VITE_API_BASE_URL: apiBaseUrlSchema.default("/api/v1"),
 });
 
-export type BrowserEnv = z.infer<typeof browserEnvSchema>;
-
-export function parseBrowserEnv(input: Record<string, unknown>): BrowserEnv {
+export function parseBrowserEnv(input: Record<string, unknown>) {
   return browserEnvSchema.parse(input);
 }
 

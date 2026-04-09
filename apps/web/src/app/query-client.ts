@@ -1,6 +1,6 @@
 import { QueryClient, type QueryClientConfig } from "@tanstack/react-query";
 
-export const queryClientConfig = {
+const queryClientConfig = {
   defaultOptions: {
     queries: {
       retry: false,

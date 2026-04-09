@@ -86,7 +86,7 @@ function positiveIntegerFromEnv(variableName: string, defaultValue?: string) {
   });
 }
 
-export const databaseUrlSchema = z.string().refine((value) => {
+const databaseUrlSchema = z.string().refine((value) => {
   try {
     const protocol = new URL(value).protocol;
 
@@ -143,7 +143,7 @@ const databaseEnvSchema = z.object({
 export type AppEnv = z.infer<typeof appEnvSchema>;
 export type DatabaseEnv = z.infer<typeof databaseEnvSchema>;
 
-export function parseAppEnv(input: unknown): AppEnv {
+function parseAppEnv(input: unknown): AppEnv {
   return appEnvSchema.parse(input);
 }
 

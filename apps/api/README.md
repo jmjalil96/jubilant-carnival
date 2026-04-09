@@ -20,6 +20,8 @@ The package has two main startup layers:
 
 The Express application is mounted under `/api/v1`.
 
+Auth routes are optional in app composition so tests and API-only setups can omit them, but the shipped web app expects the auth endpoints, including `/api/v1/auth/me`, to be mounted.
+
 ## Directory Map
 
 ```text
@@ -284,7 +286,7 @@ pnpm db:down
 - Inbucket web UI is exposed on port `9000`.
 - Inbucket POP3 is exposed on port `1100`.
 
-With the default `.env.example`, password reset emails are sent to Inbucket and can be viewed at [http://localhost:9000](http://localhost:9000).
+With the default `.env.example`, password reset emails are sent to Inbucket and can be viewed at [http://localhost:9000](http://localhost:9000). The default reset link target is the local Vite frontend at [http://localhost:5173/reset-password](http://localhost:5173/reset-password).
 
 ### Drizzle Commands
 
