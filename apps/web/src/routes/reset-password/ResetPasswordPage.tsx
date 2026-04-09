@@ -1,7 +1,7 @@
+import { passwordResetTokenSchema } from "@jubilant-carnival/contracts/auth";
 import { useState } from "react";
 import { useSearchParams } from "react-router";
 
-import { passwordResetConfirmBodySchema } from "@/features/auth/contracts";
 import AuthLayout from "@/routes/auth/AuthLayout";
 import ResetPasswordForm from "@/routes/reset-password/components/ResetPasswordForm";
 import ResetPasswordInvalidState from "@/routes/reset-password/components/ResetPasswordInvalidState";
@@ -9,8 +9,7 @@ import ResetPasswordSuccessState from "@/routes/reset-password/components/ResetP
 import { useResetPasswordForm } from "@/routes/reset-password/hooks/useResetPasswordForm";
 
 function resolveResetToken(value: string | null): string | null {
-  const parseResult =
-    passwordResetConfirmBodySchema.shape.token.safeParse(value);
+  const parseResult = passwordResetTokenSchema.safeParse(value);
 
   if (!parseResult.success) {
     return null;

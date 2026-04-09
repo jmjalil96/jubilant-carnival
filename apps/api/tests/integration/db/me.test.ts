@@ -1,3 +1,7 @@
+import {
+  currentSessionSchema,
+  AUTHENTICATION_REQUIRED_ERROR_CODE,
+} from "@jubilant-carnival/contracts";
 import { eq } from "drizzle-orm";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -79,7 +83,7 @@ describe("GET /api/v1/auth/me", () => {
       .set("Cookie", createCookieHeader(session.sessionToken));
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({
+    expect(currentSessionSchema.parse(response.body)).toEqual({
       actor: {
         user: {
           id: fixture.userId,
@@ -118,7 +122,7 @@ describe("GET /api/v1/auth/me", () => {
     expect(response.status).toBe(401);
     expect(response.body).toEqual({
       error: {
-        code: "authentication_required",
+        code: AUTHENTICATION_REQUIRED_ERROR_CODE,
         message: "Authentication required",
       },
     });
@@ -145,7 +149,7 @@ describe("GET /api/v1/auth/me", () => {
     expect(response.status).toBe(401);
     expect(response.body).toEqual({
       error: {
-        code: "authentication_required",
+        code: AUTHENTICATION_REQUIRED_ERROR_CODE,
         message: "Authentication required",
       },
     });
@@ -183,7 +187,7 @@ describe("GET /api/v1/auth/me", () => {
     expect(response.status).toBe(401);
     expect(response.body).toEqual({
       error: {
-        code: "authentication_required",
+        code: AUTHENTICATION_REQUIRED_ERROR_CODE,
         message: "Authentication required",
       },
     });
@@ -227,7 +231,7 @@ describe("GET /api/v1/auth/me", () => {
     expect(response.status).toBe(401);
     expect(response.body).toEqual({
       error: {
-        code: "authentication_required",
+        code: AUTHENTICATION_REQUIRED_ERROR_CODE,
         message: "Authentication required",
       },
     });

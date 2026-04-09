@@ -1,11 +1,11 @@
-import { requestJson, requestVoid } from "@/lib/api/client";
 import {
   currentSessionSchema,
   type CurrentSession,
   type LoginBody,
   type PasswordResetConfirmBody,
   type PasswordResetRequestBody,
-} from "@/features/auth/contracts";
+} from "@jubilant-carnival/contracts/auth";
+import { requestJson, requestVoid } from "@/lib/api/client";
 
 export function login(input: LoginBody): Promise<CurrentSession> {
   return requestJson({

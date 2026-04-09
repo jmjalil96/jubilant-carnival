@@ -1,3 +1,4 @@
+import type { Actor } from "@jubilant-carnival/contracts/auth";
 import { Router } from "express";
 
 import type { Database } from "../../infra/db.js";
@@ -18,7 +19,7 @@ import { createPasswordResetRequestRouter } from "./password-reset/request/route
 import { createPasswordResetRequestService } from "./password-reset/request/service.js";
 import { createAuthContextResolver } from "./shared/auth-context.js";
 import { createAuthContextRepository } from "./shared/auth-context-repository.js";
-import type { Actor, AuthenticatedRequestContext } from "./shared/contracts.js";
+import type { AuthenticatedRequestContext } from "./shared/contracts.js";
 import { createOptionalAuth, createRequireAuth } from "./shared/middleware.js";
 import { hashPassword, verifyPasswordHash } from "./shared/password.js";
 import { createSessionManager } from "./shared/session.js";

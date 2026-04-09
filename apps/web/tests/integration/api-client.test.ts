@@ -1,16 +1,18 @@
+import { AUTHENTICATION_REQUIRED_ERROR_CODE } from "@jubilant-carnival/contracts/errors";
+import { systemStatusSchema } from "@jubilant-carnival/contracts/system";
 import { http, HttpResponse } from "msw";
 import { z } from "zod";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
+  createApiErrorEnvelope,
+  createServiceNotReadyErrorEnvelope,
+} from "../helpers/api-fixtures";
+import {
   healthEndpointPattern,
   readinessEndpointPattern,
 } from "../setup/handlers";
 import { server } from "../setup/server";
-
-const statusSchema = z.object({
-  status: z.literal("ok"),
-});
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -27,22 +29,16 @@ describe("API client normalization", () => {
 
     server.use(
       http.get(readinessEndpointPattern, () =>
-        HttpResponse.json(
-          {
-            error: {
-              code: "service_not_ready",
-              message: "Service is not ready",
-            },
-          },
-          { status: 503 },
-        ),
+        HttpResponse.json(createServiceNotReadyErrorEnvelope(), {
+          status: 503,
+        }),
       ),
     );
 
     await expect(
       requestJson({
         path: "/ready",
-        schema: statusSchema,
+        schema: systemStatusSchema,
       }),
     ).rejects.toMatchObject({
       code: "service_not_ready",
@@ -70,7 +66,7 @@ describe("API client normalization", () => {
     await expect(
       requestJson({
         path: "/health",
-        schema: statusSchema,
+        schema: systemStatusSchema,
       }),
     ).rejects.toMatchObject({
       code: "invalid_api_response",
@@ -93,7 +89,7 @@ describe("API client normalization", () => {
     await expect(
       requestJson({
         path: "/health",
-        schema: statusSchema,
+        schema: systemStatusSchema,
       }),
     ).rejects.toMatchObject({
       code: "invalid_api_response",
@@ -110,7 +106,7 @@ describe("API client normalization", () => {
     await expect(
       requestJson({
         path: "/health",
-        schema: statusSchema,
+        schema: systemStatusSchema,
       }),
     ).rejects.toMatchObject({
       code: "network_error",
@@ -138,7 +134,7 @@ describe("API client normalization", () => {
     await expect(
       requestJson({
         path: "/health",
-        schema: statusSchema,
+        schema: systemStatusSchema,
       }),
     ).resolves.toEqual({ status: "ok" });
 
@@ -170,7 +166,7 @@ describe("API client normalization", () => {
     await expect(
       requestJson({
         path: "/health",
-        schema: statusSchema,
+        schema: systemStatusSchema,
       }),
     ).resolves.toEqual({ status: "ok" });
 
@@ -276,12 +272,12 @@ describe("API client normalization", () => {
 
     const fetchSpy = vi.fn().mockResolvedValue(
       new Response(
-        JSON.stringify({
-          error: {
-            code: "authentication_required",
+        JSON.stringify(
+          createApiErrorEnvelope({
+            code: AUTHENTICATION_REQUIRED_ERROR_CODE,
             message: "Authentication required",
-          },
-        }),
+          }),
+        ),
         {
           headers: {
             "Content-Type": "application/json",
@@ -301,7 +297,7 @@ describe("API client normalization", () => {
         method: "DELETE",
       }),
     ).rejects.toMatchObject({
-      code: "authentication_required",
+      code: AUTHENTICATION_REQUIRED_ERROR_CODE,
       message: "Authentication required",
       status: 401,
     });

@@ -1,7 +1,7 @@
+import { passwordResetConfirmBodySchema } from "@jubilant-carnival/contracts/auth";
 import { Router, type RequestHandler } from "express";
 
 import { validatedRoute } from "../../../../http/validation.js";
-import { passwordResetConfirmBodySchema } from "./contracts.js";
 import type { PasswordResetConfirmService } from "./service.js";
 
 type PasswordResetConfirmRouterDependencies = {

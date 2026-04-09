@@ -148,16 +148,18 @@ Feature folders are the frontend equivalent of backend modules.
 
 Current example:
 
-- `features/system/contracts.ts`
-  - Zod schemas for the system endpoints
+- `features/system/errors.ts`
+  - feature-owned `ApiError` guards for readiness behavior
 - `features/system/api.ts`
-  - typed API fetchers for `/health` and `/ready`
+  - typed API fetchers for `/health` and `/ready` using shared transport schemas from `@jubilant-carnival/contracts`
 - `features/system/queries.ts`
   - query keys and TanStack Query hooks
 
+Shared transport schemas and error-code constants belong in `@jubilant-carnival/contracts`. Feature folders own frontend behavior such as query hooks, route composition, and `ApiError` guards.
+
 Follow this pattern when adding new API-backed features:
 
-1. define the contract with Zod
+1. define or extend the shared transport contract when it is cross-app
 2. add feature-local fetchers
 3. expose query hooks
 4. keep route components thin

@@ -1,3 +1,4 @@
+import { VALIDATION_ERROR_CODE } from "@jubilant-carnival/contracts/errors";
 import express from "express";
 import request from "supertest";
 import { describe, expect, it } from "vitest";
@@ -111,7 +112,7 @@ describe("validatedRoute integration", () => {
       });
 
     expect(response.status).toBe(400);
-    expect(response.body.error.code).toBe("validation_error");
+    expect(response.body.error.code).toBe(VALIDATION_ERROR_CODE);
     expect(response.body.error.message).toBe("Request validation failed");
     expect(response.body.error.details.issues).toEqual(
       expect.arrayContaining([
@@ -131,7 +132,7 @@ describe("validatedRoute integration", () => {
     });
 
     expect(response.status).toBe(400);
-    expect(response.body.error.code).toBe("validation_error");
+    expect(response.body.error.code).toBe(VALIDATION_ERROR_CODE);
     expect(response.body.error.details.issues).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -150,7 +151,7 @@ describe("validatedRoute integration", () => {
     });
 
     expect(response.status).toBe(400);
-    expect(response.body.error.code).toBe("validation_error");
+    expect(response.body.error.code).toBe(VALIDATION_ERROR_CODE);
     expect(response.body.error.details.issues).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -171,7 +172,7 @@ describe("validatedRoute integration", () => {
     });
 
     expect(response.status).toBe(400);
-    expect(response.body.error.code).toBe("validation_error");
+    expect(response.body.error.code).toBe(VALIDATION_ERROR_CODE);
     expect(response.body.error.message).toBe("Request validation failed");
     expect(response.body.error.details.issues).toEqual(
       expect.arrayContaining([

@@ -1,12 +1,6 @@
-import { z } from "zod";
+import { SERVICE_NOT_READY_ERROR_CODE } from "@jubilant-carnival/contracts/errors";
 
 import { ApiError } from "@/lib/api/client";
-
-export const systemStatusSchema = z.object({
-  status: z.literal("ok"),
-});
-
-export type SystemStatus = z.infer<typeof systemStatusSchema>;
 
 export function isApiError(error: unknown): error is ApiError {
   return error instanceof ApiError;
@@ -16,6 +10,6 @@ export function isServiceNotReadyError(error: unknown): error is ApiError {
   return (
     error instanceof ApiError &&
     error.status === 503 &&
-    error.code === "service_not_ready"
+    error.code === SERVICE_NOT_READY_ERROR_CODE
   );
 }

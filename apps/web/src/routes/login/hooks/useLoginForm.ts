@@ -1,9 +1,14 @@
+import {
+  EMAIL_MAX_LENGTH,
+  PASSWORD_MAX_LENGTH,
+  type LoginBody,
+} from "@jubilant-carnival/contracts/auth";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import type { FormEventHandler } from "react";
 import type { Resolver, UseFormReturn } from "react-hook-form";
-import type { input as ZodInput } from "zod";
+import { z, type input as ZodInput } from "zod";
 
 import { useLoginMutation } from "@/features/auth/mutations";
 import {
@@ -11,9 +16,25 @@ import {
   isEmailNotVerifiedError,
   isInvalidCredentialsError,
   isPasswordResetRequiredError,
-  loginBodySchema,
-  type LoginBody,
-} from "@/features/auth/contracts";
+} from "@/features/auth/errors";
+
+const loginFormSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email is required")
+    .max(
+      EMAIL_MAX_LENGTH,
+      `Email must be ${EMAIL_MAX_LENGTH} characters or fewer`,
+    ),
+  password: z
+    .string()
+    .min(1, "Password is required")
+    .max(
+      PASSWORD_MAX_LENGTH,
+      `Password must be ${PASSWORD_MAX_LENGTH} characters or fewer`,
+    ),
+});
 
 function toSubmitErrorMessage(error: unknown): string {
   if (isInvalidCredentialsError(error)) {
@@ -42,7 +63,7 @@ export type UseLoginFormResult = {
   submitError: string | null;
 };
 
-type LoginFormValues = ZodInput<typeof loginBodySchema>;
+type LoginFormValues = ZodInput<typeof loginFormSchema>;
 
 function createLoginResolver(): Resolver<
   LoginFormValues,
@@ -51,10 +72,10 @@ function createLoginResolver(): Resolver<
 > {
   // `@hookform/resolvers` and the app's Zod import path disagree on v4 types.
   const resolverFactory = zodResolver as unknown as (
-    schema: typeof loginBodySchema,
+    schema: typeof loginFormSchema,
   ) => Resolver<LoginFormValues, undefined, LoginBody>;
 
-  return resolverFactory(loginBodySchema);
+  return resolverFactory(loginFormSchema);
 }
 
 export function useLoginForm({

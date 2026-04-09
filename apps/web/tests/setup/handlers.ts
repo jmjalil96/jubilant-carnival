@@ -1,4 +1,6 @@
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
+
+import { createAuthenticationRequiredErrorEnvelope } from "../helpers/api-fixtures";
 
 function createApiPathMatcher(pathname: string) {
   const escapedPathname = pathname.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -13,15 +15,9 @@ export const currentSessionEndpointPattern =
 
 export const defaultHandlers = [
   http.get(currentSessionEndpointPattern, () =>
-    HttpResponse.json(
-      {
-        error: {
-          code: "authentication_required",
-          message: "Authentication required",
-        },
-      },
-      { status: 401 },
-    ),
+    HttpResponse.json(createAuthenticationRequiredErrorEnvelope(), {
+      status: 401,
+    }),
   ),
   http.get(healthEndpointPattern, () => HttpResponse.json({ status: "ok" })),
   http.get(readinessEndpointPattern, () => HttpResponse.json({ status: "ok" })),

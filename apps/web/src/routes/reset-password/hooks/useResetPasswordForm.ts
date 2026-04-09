@@ -1,19 +1,29 @@
+import {
+  PASSWORD_MAX_LENGTH,
+  PASSWORD_MIN_LENGTH,
+  type PasswordResetConfirmBody,
+} from "@jubilant-carnival/contracts/auth";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import type { FormEventHandler } from "react";
 import type { Resolver, UseFormReturn } from "react-hook-form";
-import type { input as ZodInput } from "zod";
+import { z, type input as ZodInput } from "zod";
 
 import { useConfirmPasswordResetMutation } from "@/features/auth/mutations";
 import {
   isApiError,
   isInvalidPasswordResetTokenError,
-  passwordResetConfirmBodySchema,
-} from "@/features/auth/contracts";
+} from "@/features/auth/errors";
 
-const resetPasswordFormSchema = passwordResetConfirmBodySchema.pick({
-  password: true,
+const resetPasswordFormSchema = z.object({
+  password: z
+    .string()
+    .min(PASSWORD_MIN_LENGTH, "Password must be at least 8 characters")
+    .max(
+      PASSWORD_MAX_LENGTH,
+      `Password must be ${PASSWORD_MAX_LENGTH} characters or fewer`,
+    ),
 });
 
 function toSubmitErrorMessage(error: unknown): string {
@@ -36,9 +46,7 @@ export type UseResetPasswordFormResult = {
 };
 
 type ResetPasswordFormValues = ZodInput<typeof resetPasswordFormSchema>;
-type ResetPasswordFormBody = {
-  password: string;
-};
+type ResetPasswordFormBody = Pick<PasswordResetConfirmBody, "password">;
 
 function createResetPasswordResolver(): Resolver<
   ResetPasswordFormValues,

@@ -1,13 +1,13 @@
 # Jubilant Carnival
 
-This repository is a pnpm workspace monorepo. It currently contains two deployable app packages: [`@jubilant-carnival/api`](./apps/api/README.md) and [`@jubilant-carnival/web`](./apps/web/README.md). The root owns shared tooling, shared policy, CI wiring, and the standard contributor workflows.
+This repository is a pnpm workspace monorepo. It currently contains two deployable app packages, [`@jubilant-carnival/api`](./apps/api/README.md) and [`@jubilant-carnival/web`](./apps/web/README.md), plus one internal shared package, [`@jubilant-carnival/contracts`](./packages/contracts/README.md). The root owns shared tooling, shared policy, CI wiring, and the standard contributor workflows.
 
 ## Monorepo Overview
 
 - `apps/*` contains deployable applications.
-- `packages/*` is reserved for shared libraries and internal packages.
-- Today, the workspace contains `apps/api` and `apps/web`.
-- There are no shared packages yet, so shared standards live at the repo root instead of in a package.
+- `packages/*` contains shared libraries and internal packages.
+- Today, the workspace contains `apps/api`, `apps/web`, and `packages/contracts`.
+- Shared standards still live at the repo root. Shared transport contracts live in `packages/contracts`.
 
 Use the root as the default entrypoint for checks and repo-wide workflows. Use workspace package directories for runtime code and package-specific tooling.
 
@@ -18,7 +18,8 @@ Use the root as the default entrypoint for checks and repo-wide workflows. Use w
 ├── apps/
 │   ├── api/         # Express + TypeScript API
 │   └── web/         # Vite + React frontend
-├── packages/        # Reserved for future shared packages
+├── packages/
+│   └── contracts/   # Shared HTTP transport contracts
 ├── package.json     # Root scripts for monorepo workflows
 ├── pnpm-workspace.yaml
 ├── tsconfig.base.json
@@ -58,6 +59,10 @@ The API package is an Express service with strict TypeScript, Zod-based validati
 
 The web package is a Vite + React frontend with React Router, TanStack Query, Tailwind v4, shadcn/ui primitives, MSW-backed integration tests, and a Playwright Chromium smoke test. See [`apps/web/README.md`](./apps/web/README.md) for package architecture, frontend usage rules, environment setup, and package-specific commands.
 
+### `@jubilant-carnival/contracts`
+
+The contracts package is the shared source of truth for cross-app HTTP transport contracts, shared field constraints, and shared error-code constants. It deliberately excludes app-owned runtime behavior. See [`packages/contracts/README.md`](./packages/contracts/README.md) for scope.
+
 ## Getting Started
 
 ### Prerequisites
@@ -81,7 +86,9 @@ pnpm dev
 Notes:
 
 - `pnpm dev` starts the API and web apps together.
+- `pnpm dev` starts the contracts watcher plus both apps.
 - `pnpm dev:api` starts the API only.
+- `pnpm dev:contracts` starts the shared contracts watcher only.
 - `pnpm dev:web` starts the frontend only.
 - Frontend dev uses `VITE_API_BASE_URL=/api/v1` and proxies `/api` traffic to the API via Vite.
 - Stop the local database with `pnpm --filter @jubilant-carnival/api db:down`.
@@ -117,23 +124,25 @@ pnpm test:db
 What each command means today:
 
 - `pnpm dev`
-  - Starts the API and web apps together with streaming logs.
+  - Starts the contracts watcher plus the API and web apps together with streaming logs.
 - `pnpm dev:api`
   - Starts the API package only.
+- `pnpm dev:contracts`
+  - Starts the contracts package in watch mode.
 - `pnpm dev:web`
   - Starts the web package only.
 - `pnpm typecheck`
-  - Runs typecheck for both apps, including source files, tests, and local TypeScript config files.
+  - Runs typecheck for the contracts package and both apps, including source files, tests, and local TypeScript config files.
 - `pnpm lint`
-  - Runs the shared ESLint config against both apps and their relevant config files.
+  - Runs the shared ESLint config against the contracts package and both apps.
 - `pnpm lint:fix`
-  - Applies safe lint fixes in both app packages.
+  - Applies safe lint fixes in the contracts package and both app packages.
 - `pnpm format`
   - Formats the repository with Prettier.
 - `pnpm format:check`
   - Verifies the repository matches Prettier formatting without rewriting files.
 - `pnpm build`
-  - Builds both apps.
+  - Builds the contracts package and both apps.
 - `pnpm test`
   - Runs the fast/default test suites for both apps.
 - `pnpm test:e2e`
@@ -158,7 +167,7 @@ Use these rules unless there is a concrete reason not to.
 - Prefer package-local documentation for package internals.
   - The root README should orient contributors; detailed architectural guidance belongs with the package.
 - Add future shared code under `packages/*` only when it is truly shared.
-  - Do not create a shared package just to avoid a small amount of duplication.
+  - Keep shared packages narrow and purposeful. Do not create one just to avoid a small amount of duplication.
 
 ## When Adding More Packages
 

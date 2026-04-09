@@ -1,7 +1,10 @@
+import {
+  loginBodySchema,
+  type CurrentSession,
+} from "@jubilant-carnival/contracts/auth";
 import { Router } from "express";
 
 import { validatedRoute } from "../../../http/validation.js";
-import { createSessionBodySchema, type LoginResponse } from "./contracts.js";
 import { toCurrentSessionResponse } from "../shared/contracts.js";
 import type { LoginService } from "./service.js";
 import type { SessionManager } from "../shared/session.js";
@@ -21,7 +24,7 @@ export function createLoginRouter({
     "/session",
     validatedRoute(
       {
-        body: createSessionBodySchema,
+        body: loginBodySchema,
       },
       async ({ body, req, res }) => {
         const loginInput: Parameters<LoginService["login"]>[0] = {
@@ -48,7 +51,7 @@ export function createLoginRouter({
         const responseBody = toCurrentSessionResponse({
           actor: result.actor,
           expiresAt: result.expiresAt,
-        }) satisfies LoginResponse;
+        }) satisfies CurrentSession;
 
         res.status(200).json(responseBody);
       },

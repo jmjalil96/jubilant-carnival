@@ -6,10 +6,7 @@ import { cn } from "@/lib/utils";
 import InlineApiErrorPanel from "@/components/feedback/InlineApiErrorPanel";
 import InlineLoadingState from "@/components/feedback/InlineLoadingState";
 import PageLoadingState from "@/components/feedback/PageLoadingState";
-import {
-  isApiError,
-  isServiceNotReadyError,
-} from "@/features/system/contracts";
+import { isApiError, isServiceNotReadyError } from "@/features/system/errors";
 import { StatusCard } from "@/features/system/StatusCard";
 import { useHealthQuery, useReadinessQuery } from "@/features/system/queries";
 

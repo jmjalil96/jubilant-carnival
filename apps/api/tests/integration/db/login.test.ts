@@ -1,3 +1,10 @@
+import {
+  currentSessionSchema,
+  EMAIL_NOT_VERIFIED_ERROR_CODE,
+  INVALID_CREDENTIALS_ERROR_CODE,
+  PASSWORD_RESET_REQUIRED_ERROR_CODE,
+} from "@jubilant-carnival/contracts";
+import { VALIDATION_ERROR_CODE } from "@jubilant-carnival/contracts/errors";
 import { createHash } from "node:crypto";
 
 import argon2 from "argon2";
@@ -92,7 +99,7 @@ describe("POST /api/v1/auth/session", () => {
     });
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({
+    expect(currentSessionSchema.parse(response.body)).toEqual({
       actor: {
         user: {
           id: fixture.userId,
@@ -173,7 +180,7 @@ describe("POST /api/v1/auth/session", () => {
     expect(response.status).toBe(401);
     expect(response.body).toEqual({
       error: {
-        code: "invalid_credentials",
+        code: INVALID_CREDENTIALS_ERROR_CODE,
         message: "Invalid email or password",
       },
     });
@@ -201,7 +208,7 @@ describe("POST /api/v1/auth/session", () => {
     });
 
     expect(response.status).toBe(401);
-    expect(response.body.error.code).toBe("invalid_credentials");
+    expect(response.body.error.code).toBe(INVALID_CREDENTIALS_ERROR_CODE);
 
     const sessionRows = await db!
       .select({
@@ -234,7 +241,7 @@ describe("POST /api/v1/auth/session", () => {
     });
 
     expect(response.status).toBe(401);
-    expect(response.body.error.code).toBe("invalid_credentials");
+    expect(response.body.error.code).toBe(INVALID_CREDENTIALS_ERROR_CODE);
   });
 
   it("returns invalid_credentials when the user is disabled", async () => {
@@ -259,7 +266,7 @@ describe("POST /api/v1/auth/session", () => {
     });
 
     expect(response.status).toBe(401);
-    expect(response.body.error.code).toBe("invalid_credentials");
+    expect(response.body.error.code).toBe(INVALID_CREDENTIALS_ERROR_CODE);
   });
 
   it("returns invalid_credentials when the tenant is disabled", async () => {
@@ -284,7 +291,7 @@ describe("POST /api/v1/auth/session", () => {
     });
 
     expect(response.status).toBe(401);
-    expect(response.body.error.code).toBe("invalid_credentials");
+    expect(response.body.error.code).toBe(INVALID_CREDENTIALS_ERROR_CODE);
   });
 
   it("returns email_not_verified when the password is valid but the email is unverified", async () => {
@@ -311,7 +318,7 @@ describe("POST /api/v1/auth/session", () => {
     expect(response.status).toBe(403);
     expect(response.body).toEqual({
       error: {
-        code: "email_not_verified",
+        code: EMAIL_NOT_VERIFIED_ERROR_CODE,
         message: "Email address is not verified",
       },
     });
@@ -341,7 +348,7 @@ describe("POST /api/v1/auth/session", () => {
     expect(response.status).toBe(403);
     expect(response.body).toEqual({
       error: {
-        code: "password_reset_required",
+        code: PASSWORD_RESET_REQUIRED_ERROR_CODE,
         message: "Password reset is required",
       },
     });
@@ -422,7 +429,7 @@ describe("POST /api/v1/auth/session", () => {
       expect(response.status).toBe(401);
       expect(response.body).toEqual({
         error: {
-          code: "invalid_credentials",
+          code: INVALID_CREDENTIALS_ERROR_CODE,
           message: "Invalid email or password",
         },
       });
@@ -456,7 +463,7 @@ describe("POST /api/v1/auth/session", () => {
     const response = await request(app).post("/api/v1/auth/session").send({});
 
     expect(response.status).toBe(400);
-    expect(response.body.error.code).toBe("validation_error");
+    expect(response.body.error.code).toBe(VALIDATION_ERROR_CODE);
   });
 
   it("returns an empty role list when the user has no roles", async () => {

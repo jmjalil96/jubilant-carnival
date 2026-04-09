@@ -1,3 +1,4 @@
+import { VALIDATION_ERROR_CODE } from "@jubilant-carnival/contracts/errors";
 import type { Request, RequestHandler, Response } from "express";
 
 import { ZodError, type ZodTypeAny, type output as ZodOutput } from "zod";
@@ -90,7 +91,7 @@ export function validatedRoute<
       if (error instanceof ZodError) {
         throw new AppError({
           statusCode: 400,
-          code: "validation_error",
+          code: VALIDATION_ERROR_CODE,
           message: "Request validation failed",
           details: {
             issues: error.issues,

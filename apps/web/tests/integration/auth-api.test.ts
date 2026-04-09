@@ -1,4 +1,14 @@
+import {
+  AUTHENTICATION_REQUIRED_ERROR_CODE,
+  INVALID_CREDENTIALS_ERROR_CODE,
+} from "@jubilant-carnival/contracts/errors";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+import {
+  createApiErrorEnvelope,
+  createAuthenticationRequiredErrorEnvelope,
+  createCurrentSessionResponse,
+} from "../helpers/api-fixtures";
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -7,27 +17,6 @@ afterEach(() => {
 
 async function importAuthApi() {
   return await import("@/features/auth/api");
-}
-
-function createCurrentSessionResponse() {
-  return {
-    actor: {
-      user: {
-        id: "user-123",
-        email: "user@example.com",
-        displayName: "Test User",
-      },
-      tenant: {
-        id: "tenant-123",
-        slug: "test-tenant",
-        name: "Test Tenant",
-      },
-      roleKeys: ["affiliate", "client_admin"],
-    },
-    session: {
-      expiresAt: "2026-05-01T00:00:00.000Z",
-    },
-  };
 }
 
 describe("auth feature API wrappers", () => {
@@ -184,12 +173,12 @@ describe("auth feature API wrappers", () => {
 
     const fetchSpy = vi.fn().mockResolvedValue(
       new Response(
-        JSON.stringify({
-          error: {
-            code: "invalid_credentials",
+        JSON.stringify(
+          createApiErrorEnvelope({
+            code: INVALID_CREDENTIALS_ERROR_CODE,
             message: "Invalid email or password",
-          },
-        }),
+          }),
+        ),
         {
           headers: {
             "Content-Type": "application/json",
@@ -209,7 +198,7 @@ describe("auth feature API wrappers", () => {
         password: "wrong-password",
       }),
     ).rejects.toMatchObject({
-      code: "invalid_credentials",
+      code: INVALID_CREDENTIALS_ERROR_CODE,
       message: "Invalid email or password",
       status: 401,
     });
@@ -220,12 +209,7 @@ describe("auth feature API wrappers", () => {
 
     const fetchSpy = vi.fn().mockResolvedValue(
       new Response(
-        JSON.stringify({
-          error: {
-            code: "authentication_required",
-            message: "Authentication required",
-          },
-        }),
+        JSON.stringify(createAuthenticationRequiredErrorEnvelope()),
         {
           headers: {
             "Content-Type": "application/json",
@@ -240,7 +224,7 @@ describe("auth feature API wrappers", () => {
     const { fetchCurrentSession } = await importAuthApi();
 
     await expect(fetchCurrentSession()).rejects.toMatchObject({
-      code: "authentication_required",
+      code: AUTHENTICATION_REQUIRED_ERROR_CODE,
       message: "Authentication required",
       status: 401,
     });

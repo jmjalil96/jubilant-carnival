@@ -1,3 +1,9 @@
+import {
+  EMAIL_NOT_VERIFIED_ERROR_CODE,
+  INVALID_CREDENTIALS_ERROR_CODE,
+  PASSWORD_RESET_REQUIRED_ERROR_CODE,
+  type Actor,
+} from "@jubilant-carnival/contracts";
 import type { Logger } from "pino";
 
 import { AppError } from "../../../http/errors.js";
@@ -7,7 +13,6 @@ import type {
   LoginRepository,
 } from "./repository.js";
 import type { SessionManager } from "../shared/session.js";
-import type { LoginResponse } from "./contracts.js";
 
 type VerifyPasswordHash = (
   passwordHash: string,
@@ -29,7 +34,7 @@ type LoginInput = {
 };
 
 type LoginResult = {
-  actor: LoginResponse["actor"];
+  actor: Actor;
   sessionToken: string;
   expiresAt: Date;
 };
@@ -41,19 +46,19 @@ type PgConstraintError = Error & {
 
 const INVALID_CREDENTIALS_ERROR = {
   statusCode: 401,
-  code: "invalid_credentials",
+  code: INVALID_CREDENTIALS_ERROR_CODE,
   message: "Invalid email or password",
 } as const;
 
 const EMAIL_NOT_VERIFIED_ERROR = {
   statusCode: 403,
-  code: "email_not_verified",
+  code: EMAIL_NOT_VERIFIED_ERROR_CODE,
   message: "Email address is not verified",
 } as const;
 
 const PASSWORD_RESET_REQUIRED_ERROR = {
   statusCode: 403,
-  code: "password_reset_required",
+  code: PASSWORD_RESET_REQUIRED_ERROR_CODE,
   message: "Password reset is required",
 } as const;
 

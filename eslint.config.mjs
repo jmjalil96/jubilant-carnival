@@ -19,6 +19,31 @@ export default tseslint.config(
     ],
   },
   {
+    files: ["packages/contracts/src/**/*.ts"],
+    extends: [
+      js.configs.recommended,
+      ...tseslint.configs.recommendedTypeChecked,
+      eslintConfigPrettier,
+    ],
+    languageOptions: {
+      ecmaVersion: "latest",
+      sourceType: "module",
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: rootDir,
+      },
+    },
+    rules: {
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        {
+          fixStyle: "inline-type-imports",
+          prefer: "type-imports",
+        },
+      ],
+    },
+  },
+  {
     files: ["apps/api/src/**/*.ts", "apps/api/drizzle.config.ts"],
     extends: [
       js.configs.recommended,

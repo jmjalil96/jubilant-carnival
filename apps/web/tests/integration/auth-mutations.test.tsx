@@ -13,33 +13,16 @@ import {
 } from "@/features/auth/mutations";
 import { authQueryKeys, useAuthSession } from "@/features/auth/queries";
 
+import {
+  createAuthenticationRequiredErrorEnvelope,
+  createCurrentSessionResponse,
+} from "../helpers/api-fixtures";
 import { currentSessionEndpointPattern } from "../setup/handlers";
 import { server } from "../setup/server";
 
 const sessionEndpointPattern = /\/api\/v1\/auth\/session(?:\?.*)?$/;
 const resetPasswordEndpointPattern =
   /\/api\/v1\/auth\/password-reset\/confirm(?:\?.*)?$/;
-
-function createCurrentSessionResponse() {
-  return {
-    actor: {
-      user: {
-        id: "user-123",
-        email: "user@example.com",
-        displayName: "Test User",
-      },
-      tenant: {
-        id: "tenant-123",
-        slug: "test-tenant",
-        name: "Test Tenant",
-      },
-      roleKeys: ["affiliate", "client_admin"],
-    },
-    session: {
-      expiresAt: "2099-05-01T00:00:00.000Z",
-    },
-  };
-}
 
 function renderMutationProbe(component: ReactElement) {
   const queryClient = createQueryClient();
@@ -136,15 +119,9 @@ describe("auth mutation cache integration", () => {
       http.get(currentSessionEndpointPattern, () => {
         currentSessionCalls += 1;
 
-        return HttpResponse.json(
-          {
-            error: {
-              code: "authentication_required",
-              message: "Authentication required",
-            },
-          },
-          { status: 401 },
-        );
+        return HttpResponse.json(createAuthenticationRequiredErrorEnvelope(), {
+          status: 401,
+        });
       }),
       http.post(sessionEndpointPattern, () =>
         HttpResponse.json(currentSessionResponse),

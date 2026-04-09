@@ -1,16 +1,27 @@
+import {
+  EMAIL_MAX_LENGTH,
+  type PasswordResetRequestBody,
+} from "@jubilant-carnival/contracts/auth";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import type { FormEventHandler } from "react";
 import type { Resolver, UseFormReturn } from "react-hook-form";
-import type { input as ZodInput } from "zod";
+import { z, type input as ZodInput } from "zod";
 
 import { useRequestPasswordResetMutation } from "@/features/auth/mutations";
-import {
-  isApiError,
-  passwordResetRequestBodySchema,
-  type PasswordResetRequestBody,
-} from "@/features/auth/contracts";
+import { isApiError } from "@/features/auth/errors";
+
+const forgotPasswordFormSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email is required")
+    .max(
+      EMAIL_MAX_LENGTH,
+      `Email must be ${EMAIL_MAX_LENGTH} characters or fewer`,
+    ),
+});
 
 function toSubmitErrorMessage(error: unknown): string {
   if (isApiError(error) && error.status === 0) {
@@ -31,7 +42,7 @@ export type UseForgotPasswordFormResult = {
   submitError: string | null;
 };
 
-type ForgotPasswordFormValues = ZodInput<typeof passwordResetRequestBodySchema>;
+type ForgotPasswordFormValues = ZodInput<typeof forgotPasswordFormSchema>;
 
 function createForgotPasswordResolver(): Resolver<
   ForgotPasswordFormValues,
@@ -40,10 +51,10 @@ function createForgotPasswordResolver(): Resolver<
 > {
   // `@hookform/resolvers` and the app's Zod import path disagree on v4 types.
   const resolverFactory = zodResolver as unknown as (
-    schema: typeof passwordResetRequestBodySchema,
+    schema: typeof forgotPasswordFormSchema,
   ) => Resolver<ForgotPasswordFormValues, undefined, PasswordResetRequestBody>;
 
-  return resolverFactory(passwordResetRequestBodySchema);
+  return resolverFactory(forgotPasswordFormSchema);
 }
 
 export function useForgotPasswordForm({

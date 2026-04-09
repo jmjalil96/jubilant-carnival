@@ -5,34 +5,14 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createQueryClient } from "@/app/query-client";
 import { authQueryKeys, useAuthSession } from "@/features/auth/queries";
 
+import {
+  createApiErrorEnvelope,
+  createAuthenticationRequiredErrorEnvelope,
+  createCurrentSessionResponse,
+} from "../helpers/api-fixtures";
 import { renderRouterWithProviders } from "../helpers/render-router";
 import { currentSessionEndpointPattern } from "../setup/handlers";
 import { server } from "../setup/server";
-
-function createCurrentSessionResponse({
-  expiresAt = "2099-05-01T00:00:00.000Z",
-}: {
-  expiresAt?: string;
-} = {}) {
-  return {
-    actor: {
-      user: {
-        id: "user-123",
-        email: "user@example.com",
-        displayName: "Test User",
-      },
-      tenant: {
-        id: "tenant-123",
-        slug: "test-tenant",
-        name: "Test Tenant",
-      },
-      roleKeys: ["affiliate", "client_admin"],
-    },
-    session: {
-      expiresAt,
-    },
-  };
-}
 
 function AuthSessionProbe() {
   const authSession = useAuthSession();
@@ -90,15 +70,9 @@ describe("auth session integration", () => {
   it("normalizes authentication_required into unauthenticated state", async () => {
     server.use(
       http.get(currentSessionEndpointPattern, () =>
-        HttpResponse.json(
-          {
-            error: {
-              code: "authentication_required",
-              message: "Authentication required",
-            },
-          },
-          { status: 401 },
-        ),
+        HttpResponse.json(createAuthenticationRequiredErrorEnvelope(), {
+          status: 401,
+        }),
       ),
     );
 
@@ -122,12 +96,10 @@ describe("auth session integration", () => {
     server.use(
       http.get(currentSessionEndpointPattern, () =>
         HttpResponse.json(
-          {
-            error: {
-              code: "internal_server_error",
-              message: "Internal server error",
-            },
-          },
+          createApiErrorEnvelope({
+            code: "internal_server_error",
+            message: "Internal server error",
+          }),
           { status: 500 },
         ),
       ),
@@ -162,12 +134,10 @@ describe("auth session integration", () => {
     server.use(
       http.get(currentSessionEndpointPattern, () =>
         HttpResponse.json(
-          {
-            error: {
-              code: "internal_server_error",
-              message: "Internal server error",
-            },
-          },
+          createApiErrorEnvelope({
+            code: "internal_server_error",
+            message: "Internal server error",
+          }),
           { status: 500 },
         ),
       ),
@@ -208,15 +178,9 @@ describe("auth session integration", () => {
       http.get(currentSessionEndpointPattern, async () => {
         await delay(150);
 
-        return HttpResponse.json(
-          {
-            error: {
-              code: "authentication_required",
-              message: "Authentication required",
-            },
-          },
-          { status: 401 },
-        );
+        return HttpResponse.json(createAuthenticationRequiredErrorEnvelope(), {
+          status: 401,
+        });
       }),
     );
 
@@ -246,7 +210,9 @@ describe("auth session integration", () => {
     const queryClient = createQueryClient();
     const invalidateQueriesSpy = vi.spyOn(queryClient, "invalidateQueries");
     const currentSessionResponse = createCurrentSessionResponse({
-      expiresAt: new Date(Date.now() + 50).toISOString(),
+      session: {
+        expiresAt: new Date(Date.now() + 50).toISOString(),
+      },
     });
 
     queryClient.setQueryData(

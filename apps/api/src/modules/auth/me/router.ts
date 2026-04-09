@@ -1,3 +1,4 @@
+import type { CurrentSession } from "@jubilant-carnival/contracts/auth";
 import { Router, type RequestHandler } from "express";
 
 import { validatedRoute } from "../../../http/validation.js";
@@ -5,7 +6,6 @@ import {
   toCurrentSessionResponse,
   type AuthenticatedRequestContext,
 } from "../shared/contracts.js";
-import type { MeResponse } from "./contracts.js";
 
 type MeRouterDependencies = {
   requireAuth: RequestHandler;
@@ -49,7 +49,7 @@ export function createMeRouter({ requireAuth }: MeRouterDependencies): Router {
       const responseBody = toCurrentSessionResponse({
         actor: auth.actor,
         expiresAt: auth.session.expiresAt,
-      }) satisfies MeResponse;
+      }) satisfies CurrentSession;
 
       res.status(200).json(responseBody);
     }),

@@ -1,8 +1,8 @@
+import {
+  SERVICE_NOT_READY_ERROR_CODE,
+  type SystemStatus,
+} from "@jubilant-carnival/contracts";
 import { AppError } from "../../http/errors.js";
-
-type SystemStatusResponse = {
-  status: "ok";
-};
 
 type SystemServiceDependencies = {
   checkReadiness: () => Promise<void>;
@@ -12,16 +12,16 @@ export function createSystemService({
   checkReadiness,
 }: SystemServiceDependencies) {
   return {
-    getHealthStatus(): SystemStatusResponse {
+    getHealthStatus(): SystemStatus {
       return { status: "ok" };
     },
-    async getReadinessStatus(): Promise<SystemStatusResponse> {
+    async getReadinessStatus(): Promise<SystemStatus> {
       try {
         await checkReadiness();
       } catch {
         throw new AppError({
           statusCode: 503,
-          code: "service_not_ready",
+          code: SERVICE_NOT_READY_ERROR_CODE,
           message: "Service is not ready",
         });
       }

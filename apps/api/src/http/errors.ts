@@ -1,10 +1,4 @@
-export type ErrorResponse = {
-  error: {
-    code: string;
-    message: string;
-    details?: unknown;
-  };
-};
+import type { ApiErrorEnvelope } from "@jubilant-carnival/contracts/errors";
 
 type AppErrorOptions = {
   statusCode: number;
@@ -35,7 +29,7 @@ export function toErrorResponse({
   code: string;
   message: string;
   details?: unknown;
-}): ErrorResponse {
+}): ApiErrorEnvelope {
   return details === undefined
     ? {
         error: {

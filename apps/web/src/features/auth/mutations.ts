@@ -1,3 +1,9 @@
+import type {
+  CurrentSession,
+  LoginBody,
+  PasswordResetConfirmBody,
+  PasswordResetRequestBody,
+} from "@jubilant-carnival/contracts/auth";
 import {
   useMutation,
   useQueryClient,
@@ -11,12 +17,6 @@ import {
   requestPasswordReset,
 } from "@/features/auth/api";
 import { authQueryKeys } from "@/features/auth/queries";
-import type {
-  CurrentSession,
-  LoginBody,
-  PasswordResetConfirmBody,
-  PasswordResetRequestBody,
-} from "@/features/auth/contracts";
 import type { ApiError } from "@/lib/api/client";
 
 export function useLoginMutation(): UseMutationResult<

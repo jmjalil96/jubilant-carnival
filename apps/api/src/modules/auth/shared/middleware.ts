@@ -1,3 +1,4 @@
+import { AUTHENTICATION_REQUIRED_ERROR_CODE } from "@jubilant-carnival/contracts/errors";
 import type { RequestHandler } from "express";
 
 import { AppError } from "../../../http/errors.js";
@@ -5,7 +6,7 @@ import type { AuthContextResolver } from "./auth-context.js";
 
 const AUTHENTICATION_REQUIRED_ERROR = {
   statusCode: 401,
-  code: "authentication_required",
+  code: AUTHENTICATION_REQUIRED_ERROR_CODE,
   message: "Authentication required",
 } as const;
 

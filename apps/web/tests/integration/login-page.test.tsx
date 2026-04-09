@@ -1,3 +1,8 @@
+import {
+  EMAIL_NOT_VERIFIED_ERROR_CODE,
+  INVALID_CREDENTIALS_ERROR_CODE,
+  PASSWORD_RESET_REQUIRED_ERROR_CODE,
+} from "@jubilant-carnival/contracts/errors";
 import { screen, waitFor } from "@testing-library/react";
 import { delay, http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
@@ -5,44 +10,22 @@ import { describe, expect, it } from "vitest";
 import { createQueryClient } from "@/app/query-client";
 import { authQueryKeys } from "@/features/auth/queries";
 
+import {
+  createApiErrorEnvelope,
+  createAuthenticationRequiredErrorEnvelope,
+  createCurrentSessionResponse,
+} from "../helpers/api-fixtures";
 import { renderAppRoute } from "../helpers/render-router";
 import { server } from "../setup/server";
 
 const currentSessionEndpointPattern = /\/api\/v1\/auth\/me(?:\?.*)?$/;
 const loginEndpointPattern = /\/api\/v1\/auth\/session(?:\?.*)?$/;
 
-function createCurrentSessionResponse() {
-  return {
-    actor: {
-      user: {
-        id: "user-123",
-        email: "user@example.com",
-        displayName: "Test User",
-      },
-      tenant: {
-        id: "tenant-123",
-        slug: "test-tenant",
-        name: "Test Tenant",
-      },
-      roleKeys: ["affiliate", "client_admin"],
-    },
-    session: {
-      expiresAt: "2099-05-01T00:00:00.000Z",
-    },
-  };
-}
-
 function unauthenticatedCurrentSessionHandler() {
   return http.get(currentSessionEndpointPattern, () =>
-    HttpResponse.json(
-      {
-        error: {
-          code: "authentication_required",
-          message: "Authentication required",
-        },
-      },
-      { status: 401 },
-    ),
+    HttpResponse.json(createAuthenticationRequiredErrorEnvelope(), {
+      status: 401,
+    }),
   );
 }
 
@@ -86,15 +69,9 @@ describe("/login route integration", () => {
           return HttpResponse.json(currentSessionResponse);
         }
 
-        return HttpResponse.json(
-          {
-            error: {
-              code: "authentication_required",
-              message: "Authentication required",
-            },
-          },
-          { status: 401 },
-        );
+        return HttpResponse.json(createAuthenticationRequiredErrorEnvelope(), {
+          status: 401,
+        });
       }),
       http.post(loginEndpointPattern, async ({ request }) => {
         submittedBody = await request.json();
@@ -155,15 +132,9 @@ describe("/login route integration", () => {
       http.get(currentSessionEndpointPattern, async () => {
         await delay(150);
 
-        return HttpResponse.json(
-          {
-            error: {
-              code: "authentication_required",
-              message: "Authentication required",
-            },
-          },
-          { status: 401 },
-        );
+        return HttpResponse.json(createAuthenticationRequiredErrorEnvelope(), {
+          status: 401,
+        });
       }),
     );
 
@@ -197,12 +168,10 @@ describe("/login route integration", () => {
         await delay(150);
 
         return HttpResponse.json(
-          {
-            error: {
-              code: "internal_server_error",
-              message: "Internal server error",
-            },
-          },
+          createApiErrorEnvelope({
+            code: "internal_server_error",
+            message: "Internal server error",
+          }),
           { status: 500 },
         );
       }),
@@ -230,12 +199,10 @@ describe("/login route integration", () => {
       label: "server error",
       handler: http.get(currentSessionEndpointPattern, () =>
         HttpResponse.json(
-          {
-            error: {
-              code: "internal_server_error",
-              message: "Internal server error",
-            },
-          },
+          createApiErrorEnvelope({
+            code: "internal_server_error",
+            message: "Internal server error",
+          }),
           { status: 500 },
         ),
       ),
@@ -271,7 +238,7 @@ describe("/login route integration", () => {
   it.each([
     {
       error: {
-        code: "invalid_credentials",
+        code: INVALID_CREDENTIALS_ERROR_CODE,
         message: "Invalid email or password",
       },
       status: 401,
@@ -279,7 +246,7 @@ describe("/login route integration", () => {
     },
     {
       error: {
-        code: "email_not_verified",
+        code: EMAIL_NOT_VERIFIED_ERROR_CODE,
         message: "Email address is not verified",
       },
       status: 403,
@@ -287,7 +254,7 @@ describe("/login route integration", () => {
     },
     {
       error: {
-        code: "password_reset_required",
+        code: PASSWORD_RESET_REQUIRED_ERROR_CODE,
         message: "Password reset is required",
       },
       status: 403,

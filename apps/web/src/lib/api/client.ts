@@ -1,14 +1,7 @@
-import { z } from "zod";
+import { apiErrorEnvelopeSchema } from "@jubilant-carnival/contracts/errors";
+import type { ZodType } from "zod";
 
 import { env } from "@/lib/env";
-
-const apiErrorEnvelopeSchema = z.object({
-  error: z.object({
-    code: z.string(),
-    message: z.string(),
-    details: z.unknown().optional(),
-  }),
-});
 
 export class ApiError extends Error {
   readonly status: number;
@@ -159,7 +152,7 @@ export async function requestJson<T>({
   credentials = "include",
 }: {
   path: string;
-  schema: z.ZodType<T>;
+  schema: ZodType<T>;
   method?: RequestInit["method"];
   body?: unknown;
   credentials?: RequestCredentials;

@@ -1,8 +1,8 @@
-import { requestJson } from "@/lib/api/client";
 import {
   systemStatusSchema,
   type SystemStatus,
-} from "@/features/system/contracts";
+} from "@jubilant-carnival/contracts/system";
+import { requestJson } from "@/lib/api/client";
 
 export function fetchHealth(): Promise<SystemStatus> {
   return requestJson({

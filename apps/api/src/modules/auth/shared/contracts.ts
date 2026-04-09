@@ -1,16 +1,6 @@
-export type Actor = {
-  user: {
-    id: string;
-    email: string;
-    displayName: string | null;
-  };
-  tenant: {
-    id: string;
-    slug: string;
-    name: string;
-  };
-  roleKeys: string[];
-};
+import type { Actor, CurrentSession } from "@jubilant-carnival/contracts/auth";
+
+export type { Actor };
 
 export type AuthenticatedRequestContext = {
   actor: Actor;
@@ -21,20 +11,13 @@ export type AuthenticatedRequestContext = {
   };
 };
 
-export type CurrentSessionResponse = {
-  actor: Actor;
-  session: {
-    expiresAt: string;
-  };
-};
-
 export function toCurrentSessionResponse({
   actor,
   expiresAt,
 }: {
   actor: Actor;
   expiresAt: Date;
-}): CurrentSessionResponse {
+}): CurrentSession {
   return {
     actor,
     session: {

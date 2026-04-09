@@ -1,3 +1,7 @@
+import {
+  SERVICE_NOT_READY_ERROR_CODE,
+  systemStatusSchema,
+} from "@jubilant-carnival/contracts";
 import request from "supertest";
 import { describe, expect, it } from "vitest";
 
@@ -10,7 +14,7 @@ describe("HTTP integration", () => {
     const response = await request(app).get("/api/v1/health");
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({ status: "ok" });
+    expect(systemStatusSchema.parse(response.body)).toEqual({ status: "ok" });
   });
 
   it("returns readiness status when dependencies are ready", async () => {
@@ -21,7 +25,7 @@ describe("HTTP integration", () => {
     const response = await request(app).get("/api/v1/ready");
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({ status: "ok" });
+    expect(systemStatusSchema.parse(response.body)).toEqual({ status: "ok" });
   });
 
   it("returns service_not_ready when dependencies are unavailable", async () => {
@@ -36,7 +40,7 @@ describe("HTTP integration", () => {
     expect(response.status).toBe(503);
     expect(response.body).toEqual({
       error: {
-        code: "service_not_ready",
+        code: SERVICE_NOT_READY_ERROR_CODE,
         message: "Service is not ready",
       },
     });

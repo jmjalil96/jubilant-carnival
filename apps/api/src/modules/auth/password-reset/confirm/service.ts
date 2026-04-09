@@ -1,3 +1,4 @@
+import { INVALID_PASSWORD_RESET_TOKEN_ERROR_CODE } from "@jubilant-carnival/contracts/errors";
 import type { Logger } from "pino";
 
 import { AppError } from "../../../../http/errors.js";
@@ -17,7 +18,7 @@ type PasswordResetConfirmInput = {
 
 const INVALID_PASSWORD_RESET_TOKEN_ERROR = {
   statusCode: 400,
-  code: "invalid_password_reset_token",
+  code: INVALID_PASSWORD_RESET_TOKEN_ERROR_CODE,
   message: "Invalid or expired password reset token",
 } as const;
 

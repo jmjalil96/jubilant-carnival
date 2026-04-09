@@ -1,35 +1,19 @@
+import { INVALID_PASSWORD_RESET_TOKEN_ERROR_CODE } from "@jubilant-carnival/contracts/errors";
 import { screen, waitFor } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 
 import { authQueryKeys } from "@/features/auth/queries";
 
+import {
+  createApiErrorEnvelope,
+  createCurrentSessionResponse,
+} from "../helpers/api-fixtures";
 import { renderAppRoute } from "../helpers/render-router";
 import { server } from "../setup/server";
 
 const resetPasswordEndpointPattern =
   /\/api\/v1\/auth\/password-reset\/confirm(?:\?.*)?$/;
-
-function createCurrentSessionResponse() {
-  return {
-    actor: {
-      user: {
-        id: "user-123",
-        email: "user@example.com",
-        displayName: "Test User",
-      },
-      tenant: {
-        id: "tenant-123",
-        slug: "test-tenant",
-        name: "Test Tenant",
-      },
-      roleKeys: ["affiliate", "client_admin"],
-    },
-    session: {
-      expiresAt: "2026-05-01T00:00:00.000Z",
-    },
-  };
-}
 
 describe("/reset-password route integration", () => {
   it("renders the invalid-link state when the token is missing", async () => {
@@ -175,12 +159,10 @@ describe("/reset-password route integration", () => {
     server.use(
       http.post(resetPasswordEndpointPattern, () =>
         HttpResponse.json(
-          {
-            error: {
-              code: "invalid_password_reset_token",
-              message: "Invalid or expired password reset token",
-            },
-          },
+          createApiErrorEnvelope({
+            code: INVALID_PASSWORD_RESET_TOKEN_ERROR_CODE,
+            message: "Invalid or expired password reset token",
+          }),
           { status: 400 },
         ),
       ),
@@ -228,12 +210,10 @@ describe("/reset-password route integration", () => {
     server.use(
       http.post(resetPasswordEndpointPattern, () =>
         HttpResponse.json(
-          {
-            error: {
-              code: "internal_server_error",
-              message: "Internal server error",
-            },
-          },
+          createApiErrorEnvelope({
+            code: "internal_server_error",
+            message: "Internal server error",
+          }),
           { status: 500 },
         ),
       ),

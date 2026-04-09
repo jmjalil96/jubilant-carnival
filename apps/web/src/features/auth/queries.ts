@@ -1,3 +1,4 @@
+import type { CurrentSession } from "@jubilant-carnival/contracts/auth";
 import { useEffect, useRef } from "react";
 import {
   useQuery,
@@ -6,10 +7,7 @@ import {
 } from "@tanstack/react-query";
 
 import { fetchCurrentSession } from "@/features/auth/api";
-import {
-  isAuthenticationRequiredError,
-  type CurrentSession,
-} from "@/features/auth/contracts";
+import { isAuthenticationRequiredError } from "@/features/auth/errors";
 import type { ApiError } from "@/lib/api/client";
 
 export const authQueryKeys = {

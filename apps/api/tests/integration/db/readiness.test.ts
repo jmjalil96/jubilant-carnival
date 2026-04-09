@@ -1,3 +1,7 @@
+import {
+  SERVICE_NOT_READY_ERROR_CODE,
+  systemStatusSchema,
+} from "@jubilant-carnival/contracts";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -43,11 +47,13 @@ describe("database-backed readiness", () => {
     const readyBefore = await request(app).get("/api/v1/ready");
 
     expect(healthBefore.status).toBe(200);
-    expect(healthBefore.body).toEqual({ status: "ok" });
+    expect(systemStatusSchema.parse(healthBefore.body)).toEqual({
+      status: "ok",
+    });
     expect(readyBefore.status).toBe(503);
     expect(readyBefore.body).toEqual({
       error: {
-        code: "service_not_ready",
+        code: SERVICE_NOT_READY_ERROR_CODE,
         message: "Service is not ready",
       },
     });
@@ -60,8 +66,12 @@ describe("database-backed readiness", () => {
     const healthAfter = await request(app).get("/api/v1/health");
 
     expect(readyAfter.status).toBe(200);
-    expect(readyAfter.body).toEqual({ status: "ok" });
+    expect(systemStatusSchema.parse(readyAfter.body)).toEqual({
+      status: "ok",
+    });
     expect(healthAfter.status).toBe(200);
-    expect(healthAfter.body).toEqual({ status: "ok" });
+    expect(systemStatusSchema.parse(healthAfter.body)).toEqual({
+      status: "ok",
+    });
   });
 });

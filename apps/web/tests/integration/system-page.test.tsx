@@ -3,6 +3,10 @@ import { delay, http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 
 import {
+  createApiErrorEnvelope,
+  createServiceNotReadyErrorEnvelope,
+} from "../helpers/api-fixtures";
+import {
   healthEndpointPattern,
   readinessEndpointPattern,
 } from "../setup/handlers";
@@ -55,15 +59,9 @@ describe("/system route integration", () => {
   it("renders the degraded readiness state for service_not_ready", async () => {
     server.use(
       http.get(readinessEndpointPattern, () =>
-        HttpResponse.json(
-          {
-            error: {
-              code: "service_not_ready",
-              message: "Service is not ready",
-            },
-          },
-          { status: 503 },
-        ),
+        HttpResponse.json(createServiceNotReadyErrorEnvelope(), {
+          status: 503,
+        }),
       ),
     );
 
@@ -80,12 +78,10 @@ describe("/system route integration", () => {
     server.use(
       http.get(readinessEndpointPattern, () =>
         HttpResponse.json(
-          {
-            error: {
-              code: "database_unavailable",
-              message: "Database is unavailable",
-            },
-          },
+          createApiErrorEnvelope({
+            code: "database_unavailable",
+            message: "Database is unavailable",
+          }),
           { status: 500 },
         ),
       ),

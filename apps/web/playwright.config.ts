@@ -79,14 +79,14 @@ const apiCommand = [
   "SMTP_PASSWORD=test",
   "EMAIL_FROM=test@example.com",
   `PASSWORD_RESET_URL_BASE=http://localhost:${previewPort}/reset-password`,
-  "pnpm --dir ../api dev",
+  "pnpm --dir ../api dev:runtime",
 ].join(" ");
 
 const previewCommand = [
   `VITE_API_BASE_URL=http://localhost:${apiPort}/api/v1`,
-  "pnpm build",
+  "pnpm build:runtime",
   "&&",
-  `pnpm preview -- --host localhost --port ${previewPort}`,
+  `pnpm preview:runtime -- --host localhost --port ${previewPort}`,
 ].join(" ");
 
 export default defineConfig({

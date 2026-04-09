@@ -5,43 +5,21 @@ import { describe, expect, it } from "vitest";
 import { createQueryClient } from "@/app/query-client";
 import { authQueryKeys } from "@/features/auth/queries";
 
+import {
+  createApiErrorEnvelope,
+  createAuthenticationRequiredErrorEnvelope,
+  createCurrentSessionResponse,
+} from "../helpers/api-fixtures";
 import { renderAppRoute } from "../helpers/render-router";
 import { currentSessionEndpointPattern } from "../setup/handlers";
 import { server } from "../setup/server";
 
 const logoutEndpointPattern = /\/api\/v1\/auth\/session(?:\?.*)?$/;
 
-function createCurrentSessionResponse() {
-  return {
-    actor: {
-      user: {
-        id: "user-123",
-        email: "user@example.com",
-        displayName: "Test User",
-      },
-      tenant: {
-        id: "tenant-123",
-        slug: "test-tenant",
-        name: "Test Tenant",
-      },
-      roleKeys: ["affiliate", "client_admin"],
-    },
-    session: {
-      expiresAt: "2099-05-01T00:00:00.000Z",
-    },
-  };
-}
-
 function unauthenticatedCurrentSessionResponse() {
-  return HttpResponse.json(
-    {
-      error: {
-        code: "authentication_required",
-        message: "Authentication required",
-      },
-    },
-    { status: 401 },
-  );
+  return HttpResponse.json(createAuthenticationRequiredErrorEnvelope(), {
+    status: 401,
+  });
 }
 
 describe("auth-aware shell integration", () => {
@@ -174,12 +152,10 @@ describe("auth-aware shell integration", () => {
     server.use(
       http.get(currentSessionEndpointPattern, () =>
         HttpResponse.json(
-          {
-            error: {
-              code: "internal_server_error",
-              message: "Internal server error",
-            },
-          },
+          createApiErrorEnvelope({
+            code: "internal_server_error",
+            message: "Internal server error",
+          }),
           { status: 500 },
         ),
       ),
@@ -213,12 +189,10 @@ describe("auth-aware shell integration", () => {
         await delay(150);
 
         return HttpResponse.json(
-          {
-            error: {
-              code: "internal_server_error",
-              message: "Internal server error",
-            },
-          },
+          createApiErrorEnvelope({
+            code: "internal_server_error",
+            message: "Internal server error",
+          }),
           { status: 500 },
         );
       }),

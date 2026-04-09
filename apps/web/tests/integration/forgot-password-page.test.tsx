@@ -2,6 +2,11 @@ import { screen } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { describe, expect, it } from "vitest";
 
+import {
+  createApiErrorEnvelope,
+  createAuthenticationRequiredErrorEnvelope,
+  createCurrentSessionResponse,
+} from "../helpers/api-fixtures";
 import { renderAppRoute } from "../helpers/render-router";
 import { server } from "../setup/server";
 
@@ -9,38 +14,11 @@ const currentSessionEndpointPattern = /\/api\/v1\/auth\/me(?:\?.*)?$/;
 const forgotPasswordEndpointPattern =
   /\/api\/v1\/auth\/password-reset(?:\?.*)?$/;
 
-function createCurrentSessionResponse() {
-  return {
-    actor: {
-      user: {
-        id: "user-123",
-        email: "user@example.com",
-        displayName: "Test User",
-      },
-      tenant: {
-        id: "tenant-123",
-        slug: "test-tenant",
-        name: "Test Tenant",
-      },
-      roleKeys: ["affiliate", "client_admin"],
-    },
-    session: {
-      expiresAt: "2099-05-01T00:00:00.000Z",
-    },
-  };
-}
-
 function unauthenticatedCurrentSessionHandler() {
   return http.get(currentSessionEndpointPattern, () =>
-    HttpResponse.json(
-      {
-        error: {
-          code: "authentication_required",
-          message: "Authentication required",
-        },
-      },
-      { status: 401 },
-    ),
+    HttpResponse.json(createAuthenticationRequiredErrorEnvelope(), {
+      status: 401,
+    }),
   );
 }
 
@@ -126,12 +104,10 @@ describe("/forgot-password route integration", () => {
       label: "server error",
       handler: http.get(currentSessionEndpointPattern, () =>
         HttpResponse.json(
-          {
-            error: {
-              code: "internal_server_error",
-              message: "Internal server error",
-            },
-          },
+          createApiErrorEnvelope({
+            code: "internal_server_error",
+            message: "Internal server error",
+          }),
           { status: 500 },
         ),
       ),
@@ -187,12 +163,10 @@ describe("/forgot-password route integration", () => {
       unauthenticatedCurrentSessionHandler(),
       http.post(forgotPasswordEndpointPattern, () =>
         HttpResponse.json(
-          {
-            error: {
-              code: "internal_server_error",
-              message: "Internal server error",
-            },
-          },
+          createApiErrorEnvelope({
+            code: "internal_server_error",
+            message: "Internal server error",
+          }),
           { status: 500 },
         ),
       ),
